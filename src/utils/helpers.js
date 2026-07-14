@@ -19,10 +19,6 @@ export const formatDistance = (distance) => {
   return `${distance.toFixed(1)} كم`;
 };
 
-export const formatCurrency = (amount) => {
-  return `${Number(amount).toLocaleString('en-US')} دج`;
-};
-
 export const formatPrice = (amount) => {
   return `${Number(amount).toLocaleString('en-US')} دج`;
 };
@@ -74,8 +70,3 @@ export const validatePhone = (phone) => {
   return re.test(phone);
 };
 
-export const calculateDeliveryFee = (distance) => {
-  const baseFee = 200;
-  const perKmFee = 50;
-  return baseFee + Math.round(distance * perKmFee);
-};

@@ -7,19 +7,14 @@ import {
   TouchableOpacity,
   RefreshControl,
   Alert,
-  Modal,
-  TextInput,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../services/AuthContext';
-import { COLORS, WILAYAS } from '../constants/wilayas';
+import { COLORS } from '../constants/wilayas';
 import {
   getCustomerRequests,
-  createDeliveryRequest,
   cancelDeliveryRequest,
-  calculateDeliveryFee,
 } from '../services/delivery';
-import { getUserPayments, submitPayment } from '../services/payment';
 import { getUserChats } from '../services/chat';
 import { logoutUser } from '../services/auth';
 import { getAppSettings } from '../services/settings';
@@ -33,28 +28,9 @@ const CustomerDashboard = ({ navigation }) => {
   const [requests, setRequests] = useState([]);
   const [chats, setChats] = useState([]);
   const [settings, setSettings] = useState(null);
-  const [showNewRequest, setShowNewRequest] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState(null);
-
-  // New request form states
-  const [pickupAddress, setPickupAddress] = useState('');
-  const [deliveryAddress, setDeliveryAddress] = useState('');
-  const [packageDescription, setPackageDescription] = useState('');
-  const [contactPhone, setContactPhone] = useState('');
-  const [deliveryFee, setDeliveryFee] = useState(0);
-
-  // Payment form states
-  const [paymentAmount, setPaymentAmount] = useState('');
-  const [paymentScreenshot, setPaymentScreenshot] = useState(null);
-  const [paymentNote, setPaymentNote] = useState('');
 
   useEffect(() => {
     loadData();
-    const unsubChats = getUserChats(user.uid, (chatsList) => {
-      setChats(chatsList || []);
-    });
-    return () => unsubChats();
   }, []);
 
   useEffect(() => {
@@ -65,13 +41,6 @@ const CustomerDashboard = ({ navigation }) => {
       if (typeof unsubscribe === 'function') unsubscribe();
     };
   }, [user?.uid]);
-
-  useEffect(() => {
-    if (pickupAddress && deliveryAddress) {
-      const fee = calculateDeliveryFee(pickupAddress, deliveryAddress);
-      setDeliveryFee(fee);
-    }
-  }, [pickupAddress, deliveryAddress]);
 
   const loadData = async () => {
     setLoading(true);
@@ -91,33 +60,7 @@ const CustomerDashboard = ({ navigation }) => {
     setRefreshing(false);
   };
 
-  const handleCreateRequest = async () => {
-    if (!pickupAddress || !deliveryAddress || !contactPhone) {
-      Alert.alert('خطأ', 'يرجى ملء جميع الحقول المطلوبة');
-      return;
-    }
 
-    const result = await createDeliveryRequest({
-      customerId: user.uid,
-      customerName: user.fullName,
-      customerPhone: user.phone || contactPhone,
-      pickupAddress,
-      deliveryAddress,
-      packageDescription,
-      contactPhone,
-      deliveryFee,
-      wilaya: user.wilaya,
-    });
-
-    if (result.success) {
-      Alert.alert('تم', 'تم إنشاء طلب التوصيل بنجاح');
-      setShowNewRequest(false);
-      resetForm();
-      loadData();
-    } else {
-      Alert.alert('خطأ', result.error);
-    }
-  };
 
   const handleCancelRequest = (requestId) => {
     Alert.alert('تأكيد', 'هل أنت متأكد من إلغاء هذا الطلب؟', [
@@ -135,45 +78,6 @@ const CustomerDashboard = ({ navigation }) => {
         },
       },
     ]);
-  };
-
-  const handleSubmitPayment = async () => {
-    if (!paymentAmount || !paymentScreenshot) {
-      Alert.alert('خطأ', 'يرجى ملء جميع الحقول');
-      return;
-    }
-
-    const result = await submitPayment({
-      userId: user.uid,
-      userName: user.fullName,
-      amount: parseFloat(paymentAmount),
-      screenshotBase64: paymentScreenshot,
-      note: paymentNote,
-      requestId: selectedRequest?.id,
-    });
-
-    if (result.success) {
-      Alert.alert('تم', 'تم إرسال الدفع بنجاح');
-      setShowPaymentModal(false);
-      resetPaymentForm();
-    } else {
-      Alert.alert('خطأ', result.error);
-    }
-  };
-
-  const resetForm = () => {
-    setPickupAddress('');
-    setDeliveryAddress('');
-    setPackageDescription('');
-    setContactPhone('');
-    setDeliveryFee(0);
-  };
-
-  const resetPaymentForm = () => {
-    setPaymentAmount('');
-    setPaymentScreenshot(null);
-    setPaymentNote('');
-    setSelectedRequest(null);
   };
 
   const handleLogout = async () => {

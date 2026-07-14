@@ -110,7 +110,8 @@ const SubscriptionScreen = ({ navigation }) => {
               userName: user.fullName,
               amount: selectedPlan === 'monthly' ? settings?.subscription?.monthlyPrice : settings?.subscription?.yearlyPrice,
               screenshotBase64: paymentScreenshot,
-              plan: selectedPlan,
+              planType: selectedPlan,
+              planDuration: selectedPlan === 'yearly' ? 365 : 30,
               type: 'subscription',
             });
             setSubmitting(false);
@@ -262,7 +263,7 @@ const SubscriptionScreen = ({ navigation }) => {
                 </View>
                 <View style={styles.paymentHistoryBody}>
                   <Text style={styles.paymentAmount}>{payment.amount} دج</Text>
-                  <Text style={styles.paymentPlan}>{payment.plan === 'monthly' ? 'شهري' : 'سنوي'}</Text>
+                  <Text style={styles.paymentPlan}>{payment.planType === 'monthly' ? 'شهري' : payment.planType === 'yearly' ? 'سنوي' : payment.plan || ''}</Text>
                 </View>
               </View>
             ))}

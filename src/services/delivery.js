@@ -147,6 +147,18 @@ export const rateDelivery = async (requestId, rating, comment) => {
   }
 };
 
+export const updateDeliveryRequest = async (requestId, updates) => {
+  try {
+    await updateDoc(doc(db, 'delivery_requests', requestId), {
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    });
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
 export const cancelDeliveryRequest = async (requestId) => {
   try {
     await updateDoc(doc(db, 'delivery_requests', requestId), {

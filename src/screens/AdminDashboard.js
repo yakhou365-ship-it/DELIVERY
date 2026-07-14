@@ -20,6 +20,7 @@ import { getAllUsers, toggleUserStatus, deleteUser, logoutUser } from '../servic
 import { getAllRequests } from '../services/delivery';
 import { getAllPayments, approvePayment, rejectPayment } from '../services/payment';
 import { updateAdminSettings, getAppSettings } from '../services/settings';
+import { formatPrice, getStatusColor, getStatusText } from '../utils/helpers';
 
 const AdminDashboard = ({ navigation }) => {
   const { user } = useAuth();
@@ -120,7 +121,7 @@ const AdminDashboard = ({ navigation }) => {
       {
         text: 'نعم',
         onPress: async () => {
-          const result = await approvePayment(payment.id, payment.userId, payment.planType || payment.plan, payment.planDuration || 30);
+          const result = await approvePayment(payment.id, payment.userId, payment.planType || payment.plan, payment.planDuration || (payment.planType === 'yearly' || payment.plan === 'yearly' ? 365 : 30));
           if (result.success) {
             Alert.alert('تم', 'تمت الموافقة على الدفع');
             loadData();
@@ -491,34 +492,12 @@ const AdminDashboard = ({ navigation }) => {
   );
 };
 
-const getStatusColor = (status) => {
-  switch (status) {
-    case 'pending': return '#FFA000';
-    case 'accepted': return '#2196F3';
-    case 'picked_up': return '#9C27B0';
-    case 'delivered': return '#4CAF50';
-    case 'cancelled': return '#F44336';
-    default: return COLORS.textSecondary;
-  }
-};
-
-const getStatusText = (status) => {
-  switch (status) {
-    case 'pending': return 'قيد الانتظار';
-    case 'accepted': return 'مقبول';
-    case 'picked_up': return 'تم الاستلام';
-    case 'delivered': return 'تم التوصيل';
-    case 'cancelled': return 'ملغي';
-    default: return status;
-  }
-};
-
 const getPaymentStatusColor = (status) => {
   switch (status) {
     case 'pending': return '#FFA000';
     case 'approved': return '#4CAF50';
     case 'rejected': return '#F44336';
-    default: return COLORS.textSecondary;
+    default: return '#9E9E9E';
   }
 };
 

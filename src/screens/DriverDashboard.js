@@ -17,6 +17,7 @@ import {
   getPendingRequestsByWilaya,
   getDriverRequests,
   acceptDeliveryRequest,
+  updateDeliveryRequest,
   updateDeliveryStatus,
 } from '../services/delivery';
 import { getUserChats, createChat } from '../services/chat';
@@ -34,11 +35,16 @@ const DriverDashboard = ({ navigation }) => {
 
   useEffect(() => {
     loadData();
-    const unsubChats = getUserChats(user.uid, (chatsList) => {
-      setChats(chatsList || []);
-    });
-    return () => unsubChats();
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = getUserChats(user.uid, (chatsResult) => {
+      setChats(chatsResult);
+    });
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, [user?.uid]);
 
   const loadData = async () => {
     setLoading(true);
@@ -66,7 +72,10 @@ const DriverDashboard = ({ navigation }) => {
         onPress: async () => {
           const result = await acceptDeliveryRequest(request.id, user.uid, user.fullName);
           if (result.success) {
-            await createChat(request.customerId, request.customerName, user.uid, user.fullName, request.id);
+            const chatResult = await createChat(request.customerId, request.customerName, user.uid, user.fullName, request.id);
+            if (chatResult.success && chatResult.chatId) {
+              await updateDeliveryRequest(request.id, { chatId: chatResult.chatId });
+            }
             Alert.alert('تم', 'تم قبول الطلب بنجاح');
             loadData();
           } else {
@@ -225,7 +234,13 @@ const DriverDashboard = ({ navigation }) => {
           <Text style={styles.callButtonText}>📞 اتصال</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.chatButton} onPress={() => navigation.navigate('Chat', { chatId: request.id, otherUserName: request.customerName })}>
+        <TouchableOpacity style={styles.chatButton} onPress={() => {
+          if (request.chatId) {
+            navigation.navigate('Chat', { chatId: request.chatId, otherUserName: request.customerName });
+          } else {
+            Alert.alert('تنبيه', 'لم يتم إنشاء المحادثة بعد');
+          }
+        }}>
           <Text style={styles.chatButtonText}>💬</Text>
         </TouchableOpacity>
       </View>
