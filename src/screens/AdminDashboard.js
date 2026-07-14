@@ -79,16 +79,16 @@ const AdminDashboard = ({ navigation }) => {
     setRefreshing(false);
   };
 
-  const handleToggleUser = (userId, currentStatus) => {
-    const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
-    Alert.alert('تأكيد', `هل تريد ${newStatus === 'suspended' ? 'إيقاف' : 'تفعيل'} هذا المستخدم؟`, [
+  const handleToggleUser = (userId, currentActive) => {
+    const newActive = currentActive === false;
+    Alert.alert('تأكيد', `هل تريد ${newActive ? 'تفعيل' : 'إيقاف'} هذا المستخدم؟`, [
       { text: 'إلغاء', style: 'cancel' },
       {
         text: 'نعم',
         onPress: async () => {
-          const result = await toggleUserStatus(userId, newStatus);
+          const result = await toggleUserStatus(userId, newActive);
           if (result.success) {
-            Alert.alert('تم', `تم ${newStatus === 'suspended' ? 'إيقاف' : 'تفعيل'} المستخدم`);
+            Alert.alert('تم', `تم ${newActive ? 'تفعيل' : 'إيقاف'} المستخدم`);
             loadData();
           } else {
             Alert.alert('خطأ', result.error);
@@ -185,7 +185,7 @@ const AdminDashboard = ({ navigation }) => {
 
   const stats = {
     totalUsers: users.length,
-    activeDrivers: users.filter((u) => u.role === 'driver' && u.status === 'active').length,
+    activeDrivers: users.filter((u) => u.role === 'driver' && u.isActive !== false).length,
     totalRequests: requests.length,
     pendingPayments: payments.filter((p) => p.status === 'pending').length,
   };
@@ -203,7 +203,7 @@ const AdminDashboard = ({ navigation }) => {
               <Text style={styles.userEmail}>{u.email}</Text>
             </View>
           </View>
-          <View style={[styles.statusDot, { backgroundColor: u.status === 'active' ? COLORS.success : COLORS.error }]} />
+          <View style={[styles.statusDot, { backgroundColor: u.isActive !== false ? COLORS.success : COLORS.error }]} />
         </View>
 
         <View style={styles.userDetails}>
@@ -228,11 +228,11 @@ const AdminDashboard = ({ navigation }) => {
         </View>
 
         <View style={styles.cardActions}>
-          <TouchableOpacity
-            style={[styles.actionBtn, u.status === 'active' ? styles.suspendBtn : styles.activateBtn]}
-            onPress={() => handleToggleUser(u.id, u.status)}
-          >
-            <Text style={styles.actionBtnText}>{u.status === 'active' ? 'إيقاف' : 'تفعيل'}</Text>
+            <TouchableOpacity
+              style={[styles.actionBtn, u.isActive !== false ? styles.suspendBtn : styles.activateBtn]}
+              onPress={() => handleToggleUser(u.id, u.isActive)}
+            >
+              <Text style={styles.actionBtnText}>{u.isActive !== false ? 'إيقاف' : 'تفعيل'}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.actionBtn, styles.deleteBtn]} onPress={() => handleDeleteUser(u.id, u.fullName)}>
             <Text style={styles.actionBtnText}>حذف</Text>

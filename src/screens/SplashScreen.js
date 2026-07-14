@@ -35,6 +35,11 @@ const SplashScreen = ({ navigation }) => {
       })
     ).start();
 
+    if (!auth) {
+      navigation.replace('Login');
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
@@ -56,7 +61,7 @@ const SplashScreen = ({ navigation }) => {
 
   const loadingWidth = loadingAnimValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ['0%', '100%'],
+    outputRange: [0, 120],
   });
 
   return (

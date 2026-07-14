@@ -23,10 +23,8 @@ const ChatListScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = getUserChats(user.uid, (chatsResult) => {
-      if (chatsResult.success) {
-        setChats(chatsResult.chats);
-      }
+    const unsubscribe = getUserChats(user.uid, (chatsList) => {
+      setChats(chatsList || []);
       setLoading(false);
     });
 
@@ -37,9 +35,7 @@ const ChatListScreen = ({ navigation }) => {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    const result = await getUserChats(user.uid);
-    if (result.success) setChats(result.chats);
-    setRefreshing(false);
+    setTimeout(() => setRefreshing(false), 500);
   };
 
   const renderChatItem = ({ item }) => (

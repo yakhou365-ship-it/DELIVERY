@@ -53,6 +53,10 @@ const CustomerDashboard = ({ navigation }) => {
 
   useEffect(() => {
     loadData();
+    const unsubChats = getUserChats(user.uid, (chatsList) => {
+      setChats(chatsList || []);
+    });
+    return () => unsubChats();
   }, []);
 
   useEffect(() => {
@@ -64,14 +68,12 @@ const CustomerDashboard = ({ navigation }) => {
 
   const loadData = async () => {
     setLoading(true);
-    const [requestsResult, chatsResult, settingsResult] = await Promise.all([
+    const [requestsResult, settingsResult] = await Promise.all([
       getCustomerRequests(user.uid),
-      getUserChats(user.uid),
       getAppSettings(),
     ]);
 
     if (requestsResult.success) setRequests(requestsResult.requests);
-    if (chatsResult.success) setChats(chatsResult.chats);
     if (settingsResult.success) setSettings(settingsResult.settings);
     setLoading(false);
   };

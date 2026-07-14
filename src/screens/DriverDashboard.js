@@ -36,19 +36,21 @@ const DriverDashboard = ({ navigation }) => {
 
   useEffect(() => {
     loadData();
+    const unsubChats = getUserChats(user.uid, (chatsList) => {
+      setChats(chatsList || []);
+    });
+    return () => unsubChats();
   }, []);
 
   const loadData = async () => {
     setLoading(true);
-    const [pendingResult, myResult, chatsResult] = await Promise.all([
+    const [pendingResult, myResult] = await Promise.all([
       getPendingRequestsByWilaya(user.wilaya),
       getDriverRequests(user.uid),
-      getUserChats(user.uid),
     ]);
 
     if (pendingResult.success) setPendingRequests(pendingResult.requests);
     if (myResult.success) setMyRequests(myResult.requests);
-    if (chatsResult.success) setChats(chatsResult.chats);
     setLoading(false);
   };
 

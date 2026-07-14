@@ -46,16 +46,18 @@ const SubscriptionScreen = ({ navigation }) => {
   };
 
   const getDaysRemaining = () => {
-    if (!user?.subscriptionEnd) return 0;
-    const end = new Date(user.subscriptionEnd);
+    const endDate = user?.subscription?.expiryDate;
+    if (!endDate) return 0;
+    const end = new Date(endDate);
     const now = new Date();
     const diff = end - now;
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   };
 
   const getSubscriptionStatus = () => {
-    if (!user?.subscriptionEnd) return 'inactive';
-    const end = new Date(user.subscriptionEnd);
+    const endDate = user?.subscription?.expiryDate;
+    if (!endDate) return 'inactive';
+    const end = new Date(endDate);
     return end > new Date() ? 'active' : 'expired';
   };
 
@@ -169,8 +171,8 @@ const SubscriptionScreen = ({ navigation }) => {
             {subscriptionStatus === 'active' && (
               <Text style={styles.statusSubtitle}>متبقي {daysRemaining} يوم</Text>
             )}
-            {user?.subscriptionEnd && (
-              <Text style={styles.statusDate}>ينتهي في: {new Date(user.subscriptionEnd).toLocaleDateString('ar-DZ')}</Text>
+            {user?.subscription?.expiryDate && (
+              <Text style={styles.statusDate}>ينتهي في: {new Date(user.subscription.expiryDate).toLocaleDateString('ar-DZ')}</Text>
             )}
           </View>
         </View>

@@ -63,7 +63,7 @@ const ChatScreen = ({ route, navigation }) => {
         {!isMe && <Text style={styles.senderName}>{item.senderName}</Text>}
         <Text style={[styles.messageText, isMe && styles.myMessageText]}>{item.text}</Text>
         <Text style={[styles.messageTime, isMe && styles.myMessageTime]}>
-          {item.createdAt ? new Date(item.createdAt).toLocaleTimeString('ar-DZ', { hour: '2-digit', minute: '2-digit' }) : ''}
+          {item.timestamp ? new Date(item.timestamp).toLocaleTimeString('ar-DZ', { hour: '2-digit', minute: '2-digit' }) : ''}
         </Text>
       </View>
     );
