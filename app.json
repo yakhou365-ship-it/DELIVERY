@@ -1,0 +1,60 @@
+{
+  "expo": {
+    "name": "Tousalni",
+    "slug": "delivery-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2196F3"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.tousalni.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#2196F3"
+      },
+      "package": "com.tousalni.app",
+      "permissions": [
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "يحتاج توصلني إلى موقعك لتوصيل الطلبات."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "يحتاج توصلني إلى الكاميرا لالتقاط صور الإيصال.",
+          "photosPermission": "يحتاج توصلني إلى الوصول إلى الصور لاختيار صور الإيصال."
+        }
+      ],
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ec1ac176-0a9f-4727-bb15-3ccf30c404ff"
+      }
+    },
+    "owner": "mohamed99x"
+  }
+}
