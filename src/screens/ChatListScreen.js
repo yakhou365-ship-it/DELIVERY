@@ -6,15 +6,12 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
-  I18nManager,
   ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../services/AuthContext';
 import { COLORS } from '../constants/wilayas';
 import { getUserChats } from '../services/chat';
-
-I18nManager.forceRTL(true);
 
 const ChatListScreen = ({ navigation }) => {
   const { user } = useAuth();

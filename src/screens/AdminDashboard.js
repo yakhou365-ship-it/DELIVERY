@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   RefreshControl,
   Alert,
-  I18nManager,
   ActivityIndicator,
   Modal,
   TextInput,
@@ -17,12 +16,10 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../services/AuthContext';
 import { COLORS } from '../constants/wilayas';
-import { getAllUsers, toggleUserStatus, deleteUser } from '../services/auth';
+import { getAllUsers, toggleUserStatus, deleteUser, logoutUser } from '../services/auth';
 import { getAllRequests } from '../services/delivery';
 import { getAllPayments, approvePayment, rejectPayment } from '../services/payment';
 import { updateAdminSettings, getAppSettings } from '../services/settings';
-
-I18nManager.forceRTL(true);
 
 const AdminDashboard = ({ navigation }) => {
   const { user } = useAuth();
@@ -117,13 +114,13 @@ const AdminDashboard = ({ navigation }) => {
     ]);
   };
 
-  const handleApprovePayment = (paymentId) => {
+  const handleApprovePayment = (payment) => {
     Alert.alert('تأكيد', 'هل تريد الموافقة على هذا الدفع؟', [
       { text: 'إلغاء', style: 'cancel' },
       {
         text: 'نعم',
         onPress: async () => {
-          const result = await approvePayment(paymentId);
+          const result = await approvePayment(payment.id, payment.userId, payment.planType || payment.plan, payment.planDuration || 30);
           if (result.success) {
             Alert.alert('تم', 'تمت الموافقة على الدفع');
             loadData();
@@ -305,7 +302,7 @@ const AdminDashboard = ({ navigation }) => {
 
         {payment.status === 'pending' && (
           <View style={styles.cardActions}>
-            <TouchableOpacity style={[styles.actionBtn, styles.approveBtn]} onPress={() => handleApprovePayment(payment.id)}>
+            <TouchableOpacity style={[styles.actionBtn, styles.approveBtn]} onPress={() => handleApprovePayment(payment)}>
               <Text style={styles.actionBtnText}>موافقة</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.actionBtn, styles.rejectBtn]} onPress={() => handleRejectPayment(payment.id)}>
@@ -317,9 +314,22 @@ const AdminDashboard = ({ navigation }) => {
     </View>
   );
 
+  const handleLogout = async () => {
+    Alert.alert('تأكيد', 'هل تريد تسجيل الخروج؟', [
+      { text: 'إلغاء', style: 'cancel' },
+      { text: 'نعم', onPress: async () => {
+        await logoutUser();
+        navigation.replace('Login');
+      }},
+    ]);
+  };
+
   return (
     <View style={styles.container}>
       <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
+        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+          <Text style={styles.logoutButtonText}>تسجيل الخروج</Text>
+        </TouchableOpacity>
         <View style={styles.headerRow}>
           <TouchableOpacity style={styles.settingsBtn} onPress={() => setShowSettings(true)}>
             <Text style={styles.settingsBtnText}>⚙️</Text>
@@ -590,6 +600,8 @@ const styles = StyleSheet.create({
   cancelSettingsBtnText: { color: COLORS.textSecondary, fontWeight: '600' },
   saveSettingsBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, backgroundColor: COLORS.primary, alignItems: 'center' },
   saveSettingsBtnText: { color: COLORS.white, fontWeight: '600' },
+  logoutButton: { position: 'absolute', top: 50, left: 20, paddingVertical: 6, paddingHorizontal: 12, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8 },
+  logoutButtonText: { color: COLORS.white, fontSize: 13, fontWeight: '600' },
 });
 
 export default AdminDashboard;

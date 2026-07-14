@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   ActivityIndicator,
-  I18nManager,
   FlatList,
   Modal,
   Alert,
@@ -18,8 +17,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, WILAYAS, VEHICLE_TYPES, USER_ROLES } from '../constants/wilayas';
 import { registerUser } from '../services/auth';
 import { validateEmail, validatePhone } from '../utils/helpers';
-
-I18nManager.forceRTL(true);
 
 const RegisterScreen = ({ navigation }) => {
   const [step, setStep] = useState(1);

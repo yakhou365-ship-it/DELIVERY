@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  I18nManager,
   ActivityIndicator,
   Image,
 } from 'react-native';
@@ -17,8 +16,6 @@ import { getAppSettings } from '../services/settings';
 import { submitPayment, getUserPayments } from '../services/payment';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
-
-I18nManager.forceRTL(true);
 
 const SubscriptionScreen = ({ navigation }) => {
   const { user } = useAuth();
@@ -46,18 +43,16 @@ const SubscriptionScreen = ({ navigation }) => {
   };
 
   const getDaysRemaining = () => {
-    const endDate = user?.subscription?.expiryDate;
-    if (!endDate) return 0;
-    const end = new Date(endDate);
+    if (!user?.subscription?.expiryDate) return 0;
+    const end = new Date(user.subscription.expiryDate);
     const now = new Date();
     const diff = end - now;
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   };
 
   const getSubscriptionStatus = () => {
-    const endDate = user?.subscription?.expiryDate;
-    if (!endDate) return 'inactive';
-    const end = new Date(endDate);
+    if (!user?.subscription?.expiryDate) return 'inactive';
+    const end = new Date(user.subscription.expiryDate);
     return end > new Date() ? 'active' : 'expired';
   };
 

@@ -1,12 +1,10 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, I18nManager } from 'react-native';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { auth } from '../services/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getUserData } from '../services/auth';
 import { COLORS } from '../constants/wilayas';
-
-I18nManager.forceRTL(true);
 
 const SplashScreen = ({ navigation }) => {
   const scaleValue = useRef(new Animated.Value(0.5)).current;

@@ -10,14 +10,11 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Platform,
-  I18nManager,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS } from '../constants/wilayas';
 import { loginUser, resetPassword } from '../services/auth';
 import { useAuth } from '../services/AuthContext';
-
-I18nManager.forceRTL(true);
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');

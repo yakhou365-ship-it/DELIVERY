@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   RefreshControl,
   Alert,
-  I18nManager,
   ActivityIndicator,
   Linking,
 } from 'react-native';
@@ -21,9 +20,8 @@ import {
   updateDeliveryStatus,
 } from '../services/delivery';
 import { getUserChats, createChat } from '../services/chat';
-import { formatPrice } from '../utils/helpers';
-
-I18nManager.forceRTL(true);
+import { logoutUser } from '../services/auth';
+import { formatPrice, getStatusColor, getStatusText } from '../utils/helpers';
 
 const DriverDashboard = ({ navigation }) => {
   const { user } = useAuth();
@@ -101,30 +99,18 @@ const DriverDashboard = ({ navigation }) => {
     ]);
   };
 
+  const handleLogout = async () => {
+    Alert.alert('تأكيد', 'هل تريد تسجيل الخروج؟', [
+      { text: 'إلغاء', style: 'cancel' },
+      { text: 'نعم', onPress: async () => {
+        await logoutUser();
+        navigation.replace('Login');
+      }},
+    ]);
+  };
+
   const handleCallCustomer = (phone) => {
     Linking.openURL(`tel:${phone}`);
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'pending': return '#FFA000';
-      case 'accepted': return '#2196F3';
-      case 'picked_up': return '#9C27B0';
-      case 'delivered': return '#4CAF50';
-      case 'cancelled': return '#F44336';
-      default: return COLORS.textSecondary;
-    }
-  };
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'pending': return 'قيد الانتظار';
-      case 'accepted': return 'مقبول';
-      case 'picked_up': return 'تم الاستلام';
-      case 'delivered': return 'تم التوصيل';
-      case 'cancelled': return 'ملغي';
-      default: return status;
-    }
   };
 
   const renderPendingRequest = (request) => (
@@ -266,6 +252,9 @@ const DriverDashboard = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
+        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+          <Text style={styles.logoutButtonText}>تسجيل الخروج</Text>
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>لوحة السائق</Text>
         <Text style={styles.headerSubtitle}>مرحباً، {user?.fullName || 'سائق'}</Text>
       </LinearGradient>
@@ -400,6 +389,8 @@ const styles = StyleSheet.create({
   chatName: { fontSize: 14, fontWeight: '600', color: COLORS.text, textAlign: 'right' },
   chatLastMessage: { fontSize: 12, color: COLORS.textSecondary, textAlign: 'right', marginTop: 2 },
   chatTime: { fontSize: 10, color: COLORS.textSecondary },
+  logoutButton: { position: 'absolute', top: 50, left: 20, paddingVertical: 6, paddingHorizontal: 12, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8 },
+  logoutButtonText: { color: COLORS.white, fontSize: 13, fontWeight: '600' },
 });
 
 export default DriverDashboard;

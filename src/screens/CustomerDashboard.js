@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   RefreshControl,
   Alert,
-  I18nManager,
   Modal,
   TextInput,
 } from 'react-native';
@@ -22,10 +21,9 @@ import {
 } from '../services/delivery';
 import { getUserPayments, submitPayment } from '../services/payment';
 import { getUserChats } from '../services/chat';
+import { logoutUser } from '../services/auth';
 import { getAppSettings } from '../services/settings';
-import { formatPrice } from '../utils/helpers';
-
-I18nManager.forceRTL(true);
+import { formatPrice, getStatusColor, getStatusText } from '../utils/helpers';
 
 const CustomerDashboard = ({ navigation }) => {
   const { user } = useAuth();
@@ -58,6 +56,15 @@ const CustomerDashboard = ({ navigation }) => {
     });
     return () => unsubChats();
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = getUserChats(user.uid, (chatsResult) => {
+      setChats(chatsResult);
+    });
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, [user?.uid]);
 
   useEffect(() => {
     if (pickupAddress && deliveryAddress) {
@@ -169,26 +176,14 @@ const CustomerDashboard = ({ navigation }) => {
     setSelectedRequest(null);
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'pending': return '#FFA000';
-      case 'accepted': return '#2196F3';
-      case 'picked_up': return '#9C27B0';
-      case 'delivered': return '#4CAF50';
-      case 'cancelled': return '#F44336';
-      default: return COLORS.textSecondary;
-    }
-  };
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'pending': return 'قيد الانتظار';
-      case 'accepted': return 'تم القبول';
-      case 'picked_up': return 'تم الاستلام';
-      case 'delivered': return 'تم التوصيل';
-      case 'cancelled': return 'ملغي';
-      default: return status;
-    }
+  const handleLogout = async () => {
+    Alert.alert('تأكيد', 'هل تريد تسجيل الخروج؟', [
+      { text: 'إلغاء', style: 'cancel' },
+      { text: 'نعم', onPress: async () => {
+        await logoutUser();
+        navigation.replace('Login');
+      }},
+    ]);
   };
 
   const renderRequestCard = (request) => (
@@ -258,6 +253,9 @@ const CustomerDashboard = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
+        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+          <Text style={styles.logoutButtonText}>تسجيل الخروج</Text>
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>لوحة التحكم</Text>
         <Text style={styles.headerSubtitle}>مرحباً، {user?.fullName || 'عميل'}</Text>
       </LinearGradient>
@@ -383,6 +381,8 @@ const styles = StyleSheet.create({
   fab: { position: 'absolute', bottom: 24, left: 24, width: 56, height: 56, borderRadius: 28, elevation: 6 },
   fabGradient: { flex: 1, borderRadius: 28, justifyContent: 'center', alignItems: 'center' },
   fabText: { color: COLORS.white, fontSize: 28, fontWeight: '300' },
+  logoutButton: { position: 'absolute', top: 50, left: 20, paddingVertical: 6, paddingHorizontal: 12, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8 },
+  logoutButtonText: { color: COLORS.white, fontSize: 13, fontWeight: '600' },
 });
 
 export default CustomerDashboard;

@@ -17,7 +17,7 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 import { auth, db } from './firebase';
-import { USER_ROLES, ADMIN_EMAIL, ADMIN_PASSWORD } from '../constants/wilayas';
+import { USER_ROLES, ADMIN_EMAIL } from '../constants/wilayas';
 
 const checkAuth = () => {
   if (!auth) throw new Error('Firebase Auth غير متوفر. تحقق من اتصالك بالإنترنت وأعد تشغيل التطبيق.');
@@ -93,11 +93,6 @@ export const loginUser = async (email, password) => {
     }
 
     const userData = userDoc.data();
-    if (email === ADMIN_EMAIL && userData.role !== USER_ROLES.ADMIN) {
-      await updateDoc(doc(db, 'users', userCredential.user.uid), { role: USER_ROLES.ADMIN });
-      userData.role = USER_ROLES.ADMIN;
-    }
-
     return { success: true, user: userData };
   } catch (error) {
     return { success: false, error: error.message };
@@ -190,7 +185,10 @@ export const getNearbyDrivers = async (wilaya) => {
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       if (data.currentLocation && data.subscription && data.subscription.isActive) {
-        drivers.push(data);
+        const expiryDate = new Date(data.subscription.expiryDate);
+        if (expiryDate > new Date()) {
+          drivers.push(data);
+        }
       }
     });
     return { success: true, drivers };
@@ -228,38 +226,12 @@ export const deleteUser = async (uid) => {
   try {
     checkDb();
     await deleteDoc(doc(db, 'users', uid));
+    // Note: Firebase Auth user deletion requires Firebase Admin SDK (server-side).
+    // Consider using a Cloud Function to fully delete the auth account.
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
   }
 };
 
-export const updateAdminSettings = async (settings) => {
-  try {
-    checkDb();
-    await setDoc(doc(db, 'settings', 'app_settings'), settings, { merge: true });
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-};
 
-export const getAppSettings = async () => {
-  try {
-    checkDb();
-    const docSnap = await getDoc(doc(db, 'settings', 'app_settings'));
-    if (docSnap.exists()) {
-      return { success: true, settings: docSnap.data() };
-    }
-    return {
-      success: true,
-      settings: {
-        subscriptionMonthly: { price: 0, duration: 30 },
-        subscriptionYearly: { price: 0, duration: 365 },
-        ccp: { accountNumber: '', key: '', name: '', wilaya: '' },
-      },
-    };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-};

@@ -1,5 +1,4 @@
 export const ADMIN_EMAIL = 'mohamedyakhou40@gmail.com';
-export const ADMIN_PASSWORD = '052307My';
 
 export const WILAYAS = [
   { id: 1, name: "أدرار", nameEn: "Adrar" },

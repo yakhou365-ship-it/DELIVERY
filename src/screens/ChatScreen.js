@@ -8,15 +8,12 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
-  I18nManager,
   Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../services/AuthContext';
 import { COLORS } from '../constants/wilayas';
 import { sendMessage, subscribeToMessages, markMessagesAsRead } from '../services/chat';
-
-I18nManager.forceRTL(true);
 
 const ChatScreen = ({ route, navigation }) => {
   const { chatId, otherUserName } = route.params;

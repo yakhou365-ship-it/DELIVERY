@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  I18nManager,
   ActivityIndicator,
   Modal,
   FlatList,
@@ -18,8 +17,6 @@ import { useAuth } from '../services/AuthContext';
 import { COLORS, WILAYAS, VEHICLE_TYPES, ITEM_TYPES } from '../constants/wilayas';
 import { createDeliveryRequest, calculateDeliveryFee } from '../services/delivery';
 import * as Location from 'expo-location';
-
-I18nManager.forceRTL(true);
 
 const NewDeliveryRequest = ({ navigation }) => {
   const { user } = useAuth();

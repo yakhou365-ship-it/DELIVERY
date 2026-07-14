@@ -42,6 +42,18 @@ export const createDeliveryRequest = async (requestData) => {
 
 export const acceptDeliveryRequest = async (requestId, driverId, driverName) => {
   try {
+    const driverDoc = await getDoc(doc(db, 'users', driverId));
+    if (driverDoc.exists()) {
+      const driverData = driverDoc.data();
+      if (driverData.subscription && driverData.subscription.isActive) {
+        const expiryDate = new Date(driverData.subscription.expiryDate);
+        if (expiryDate <= new Date()) {
+          return { success: false, error: 'اشتراكك منتهي. يرجى تجديده لقبول الطلبات.' };
+        }
+      } else {
+        return { success: false, error: 'ليس لديك اشتراك نشط. يرجى الاشتراك أولاً.' };
+      }
+    }
     await updateDoc(doc(db, 'delivery_requests', requestId), {
       driverId: driverId,
       driverName: driverName,
@@ -148,10 +160,18 @@ export const cancelDeliveryRequest = async (requestId) => {
 };
 
 export const calculateDeliveryFee = (pickupAddress, deliveryAddress) => {
+  // Base fee for any delivery
   const baseFee = 200;
+  // Estimate distance based on address text similarity
+  // This is a client-side heuristic; for production, use a distance matrix API
+  const words1 = pickupAddress.split(/[\s,]+/).filter(Boolean);
+  const words2 = deliveryAddress.split(/[\s,]+/).filter(Boolean);
+  const uniqueWords = new Set([...words1, ...words2]);
+  const commonWords = words1.filter(w => words2.includes(w));
+  // More common words = closer addresses = lower fee
+  const similarity = commonWords.length / uniqueWords.size;
+  const estimatedKm = Math.max(1, Math.min(50, Math.round((1 - similarity) * 30 + 3)));
   const kmRate = 50;
-  const len = Math.abs(pickupAddress.length - deliveryAddress.length);
-  const estimatedKm = Math.max(1, Math.min(50, Math.floor(len / 5) + 3));
   return baseFee + estimatedKm * kmRate;
 };
 
