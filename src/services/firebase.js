@@ -14,14 +14,39 @@ const firebaseConfig = {
 let app = null;
 let auth = null;
 let db = null;
+let initError = null;
 
 try {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
 } catch (error) {
-  console.error('Firebase init error:', error.message || error);
+  initError = error.message || error.toString();
+  console.error('Firebase init error:', initError);
 }
+
+// Safe getter - throws a clear error if Firebase failed to initialize
+export const requireAuth = () => {
+  if (!auth) {
+    throw new Error(
+      initError
+        ? `فشل تهيئة Firebase: ${initError}. تحقق من اتصالك بالإنترنت.`
+        : 'Firebase Auth غير متوفر. تحقق من اتصالك بالإنترنت وأعد تشغيل التطبيق.'
+    );
+  }
+  return auth;
+};
+
+export const requireDb = () => {
+  if (!db) {
+    throw new Error(
+      initError
+        ? `فشل تهيئة Firestore: ${initError}. تحقق من اتصالك بالإنترنت.`
+        : 'Firebase Firestore غير متوفر. تحقق من اتصالك بالإنترنت.'
+    );
+  }
+  return db;
+};
 
 export { auth, db };
 export default app;

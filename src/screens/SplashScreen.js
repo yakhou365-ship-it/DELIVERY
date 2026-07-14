@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Animated, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { auth } from '../services/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -10,6 +10,7 @@ const SplashScreen = ({ navigation }) => {
   const scaleValue = useRef(new Animated.Value(0.5)).current;
   const opacityValue = useRef(new Animated.Value(0)).current;
   const loadingAnimValue = useRef(new Animated.Value(0)).current;
+  const hasNavigated = useRef(false);
 
   useEffect(() => {
     Animated.parallel([
@@ -33,29 +34,65 @@ const SplashScreen = ({ navigation }) => {
       })
     ).start();
 
-    if (!auth) {
-      navigation.replace('Login');
-      return;
-    }
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
+    // Safety timeout: navigate to Login after 5 seconds if auth check hangs
+    const safetyTimeout = setTimeout(() => {
+      if (!hasNavigated.current) {
+        hasNavigated.current = true;
         try {
-          const result = await getUserData(user.uid);
-          const role = result.success ? result.user?.role : 'customer';
-          if (role === 'admin') navigation.replace('AdminDashboard');
-          else if (role === 'driver') navigation.replace('DriverDashboard');
-          else navigation.replace('CustomerDashboard');
+          navigation.replace('Login');
         } catch (e) {
-          navigation.replace('CustomerDashboard');
+          // navigation may be unmounted
         }
-      } else {
+      }
+    }, 5000);
+
+    let unsubscribe = null;
+
+    try {
+      if (!auth) {
+        // Firebase not initialized - go to Login after a short delay
+        setTimeout(() => {
+          if (!hasNavigated.current) {
+            hasNavigated.current = true;
+            navigation.replace('Login');
+          }
+        }, 2000);
+        return () => clearTimeout(safetyTimeout);
+      }
+
+      unsubscribe = onAuthStateChanged(auth, async (user) => {
+        if (hasNavigated.current) return;
+        hasNavigated.current = true;
+        clearTimeout(safetyTimeout);
+
+        if (user) {
+          try {
+            const result = await getUserData(user.uid);
+            const role = result.success ? result.user?.role : 'customer';
+            if (role === 'admin') navigation.replace('AdminDashboard');
+            else if (role === 'driver') navigation.replace('DriverDashboard');
+            else navigation.replace('CustomerDashboard');
+          } catch (e) {
+            navigation.replace('CustomerDashboard');
+          }
+        } else {
+          navigation.replace('Login');
+        }
+      });
+    } catch (error) {
+      console.error('SplashScreen auth error:', error);
+      if (!hasNavigated.current) {
+        hasNavigated.current = true;
+        clearTimeout(safetyTimeout);
         navigation.replace('Login');
       }
-    });
+    }
 
-    return unsubscribe;
-  }, [navigation, scaleValue, opacityValue, loadingAnimValue]);
+    return () => {
+      clearTimeout(safetyTimeout);
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, []);
 
   const loadingWidth = loadingAnimValue.interpolate({
     inputRange: [0, 1],
