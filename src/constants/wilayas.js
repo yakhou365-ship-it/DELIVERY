@@ -92,7 +92,6 @@ export const VEHICLE_TYPES = [
   { id: 'motorcycle', name: 'دراجة نارية', emoji: '🏍️' },
   { id: 'car', name: 'سيارة', emoji: '🚗' },
   { id: 'bicycle', name: 'دراجة هوائية', emoji: '🚲' },
-  { id: 'walking', name: 'مشي', emoji: '🚶' },
 ];
 
 export const ITEM_TYPES = [

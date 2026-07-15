@@ -95,7 +95,7 @@ const NewDeliveryRequest = ({ navigation }) => {
               customerPhone: user.phone || contactPhone,
               pickupAddress,
               deliveryAddress,
-              packageDescription,
+              itemDescription: packageDescription,
               contactPhone,
               deliveryFee,
               vehicleType,

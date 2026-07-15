@@ -10,9 +10,7 @@ import {
   ActivityIndicator,
   Modal,
   TextInput,
-  Switch,
-  FlatList,
-} from 'react-native';
+}]} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../services/AuthContext';
 import { COLORS } from '../constants/wilayas';
